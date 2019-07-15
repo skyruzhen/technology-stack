@@ -1,0 +1,189 @@
+
+#Windows
+netstat -aon|findstr "8088"
+tasklist|findstr "8088"
+taskkill /f /t /im Tencentdl.exe
+netsh interface set interface name="本地连接" admin=DISABLED
+
+tasklist|findstr "61616"
+
+#Linux
+
+scp /home/tpbbops/tpyz-temp/war/taipingwx.war tpbbops@172.30.100.3:/home/tpbbops/tomcat/webapps
+
+#测试环境
+#测试-跳板	10.28.151.137	ssh: 22	tpbbops / tpbbops
+ssh tpbbops@172.30.100.3
+ssh tpbbops@172.30.100.6
+
+#生产环境 
+#生产-跳板	10.100.19.79	ssh: 11113	lexiangops / lexiangops tpbbops / tpbbbops
+ssh tpbbops@172.30.30.10
+ssh tpbbops@172.30.30.11
+
+
+curl https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxbfb8a1a1ba2fc0bd&redirect_uri=http://wxtest.life.cntaiping.com/taipingwx/wechat_oauth_callback&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect
+
+
+#查看每个用户最大允许打开文件数量
+
+ulimit -a
+lsof -p pid | wc -l
+ulimit -n 2048  暂时有效
+
+#查看TCP配置
+/etc/sysctl.conf
+#当客户端因为某种原因先于服务端发出了FIN信号，就会导致服务端被动关闭，若服务端不主动关闭socket发FIN给Client，此时服务端Socket会处于CLOSE_WAIT状态（而不是LAST_ACK状态）。通常来说，一个CLOSE_WAIT会维持至少2个小时的时间（系统默认超时时间的是7200秒，也就是2小时）。如果服务端程序因某个原因导致系统造成一堆CLOSE_WAIT消耗资源，那么通常是等不到释放那一刻，系统就已崩溃。因此，解决这个问题的方法还可以通过修改TCP/IP的参数来缩短这个时间，于是修改tcp_keepalive_*系列参数： 
+tcp_keepalive_time： 
+/proc/sys/net/ipv4/tcp_keepalive_time 
+#INTEGER，默认值是7200(2小时) 
+#当keepalive打开的情况下，TCP发送keepalive消息的频率。建议修改值为1800秒。 
+
+tcp_keepalive_probes：INTEGER 
+/proc/sys/net/ipv4/tcp_keepalive_probes 
+#INTEGER，默认值是9 
+#TCP发送keepalive探测以确定该连接已经断开的次数。(注意:保持连接仅在SO_KEEPALIVE套接字选项被打开是才发送.次数默认不需要修改,当然根据情形也可以适当地缩短此值.设置为5比较合适) 
+
+tcp_keepalive_intvl：INTEGER 
+/proc/sys/net/ipv4/tcp_keepalive_intvl 
+#INTEGER，默认值为75 
+#当探测没有确认时，重新发送探测的频度。探测消息发送的频率（在认定连接失效之前，发送多少个TCP的keepalive探测包）。乘以tcp_keepalive_probes就得到对于从开始探测以来没有响应的连接杀除的时间。默认值为75秒，也就是没有活动的连接将在大约11分钟以后将被丢弃。(对于普通应用来说,这个值有一些偏大,可以根据需要改小.特别是web类服务器需要改小该值,15是个比较合适的值) 
+
+
+#查看TCP连接状态
+netstat -n |awk '/^tcp/{++S[$NF]}END{for(a in S)print a,S[a]}'
+
+#断定遭到SYN攻击了，使用如下命令可以让之现行：
+netstat -nap | grep SYN_RECV
+
+#测试环境URL
+http://wxtest.life.cntaiping.com/taipingwx/tpyzEntrance?state=32
+http://127.0.0.1:8080/taipingwx/tpyzEntrance?state=32
+
+#查找文件位置
+find /etc -name '*srm*'
+
+#访问量排名前10的ip地址:
+cat access.log | cut -f1 -d " " | sort | uniq -c | sort -k 1 -n -r | head -10
+
+#页面访问量排名前10的url:
+cat access.log | cut –f4 -d " " | sort | uniq -c | sort -k 1 -n -r | head -10
+
+#查看最耗时的页面
+cat localhost_access_log.2018-11-02.txt | uniq  | sort -k 2 -n -r | head -10
+cat localhost_access_log.2018-11-02.txt|uniq | sort -t " " -k 10 | head -10
+
+
+#以下是 crontab 文件的格式：
+
+{minute} {hour} {day-of-month} {month} {day-of-week} {full-path-to-shell-script} 
+#o minute: 区间为 0 – 59 
+#o hour: 区间为0 – 23 
+#o day-of-month: 区间为0 – 31 
+#o month: 区间为1 – 12. 1 是1月. 12是12月. 
+#o Day-of-week: 区间为0 – 7. 周日可以是0或7.
+
+#打开某个端口的防火墙
+iptables  -I  INPUT  -p  tcp  --dport  8080  -j  ACCEPT  
+/etc/init.d/iptables  save
+/etc/init.d/iptables  restart
+
+
+#停止firewall 
+systemctl stop firewalld.service
+#禁止firewall开机启动 
+systemctl disable firewalld.service
+
+#安装iptables 
+yum install iptables-services
+
+#开启一个端口到防火墙--永久生效
+firewall-cmd --zone=public --add-port=7777/tcp --permanent
+ 
+#修改配置后需要重启服务使其生效
+systemctl restart firewalld.service
+
+#编辑防火墙文件 
+vi /etc/sysconfig/iptables 
+#添加80和3306端口 
+-A INPUT -m state –state NEW -m tcp -p tcp –dport 80 -j ACCEPT 
+-A INPUT -m state –state NEW -m tcp -p tcp –dport 3306 -j ACCEPT
+-A INPUT -m state –state NEW -m tcp -p tcp –dport 8080 -j ACCEPT
+
+#重启防火墙使配置文件生效 
+systemctl restart iptables.service
+
+#设置iptables防火墙为开机启动项 
+systemctl enable iptables.service
+
+
+#查看占用率高的进程
+top
+
+#找到CPU使用率较高的线程ID
+ps p 24809 -L -o pcpu,pid,tid,time,tname,cmd
+
+#禁用某个ip的请求
+iptables -I INPUT -s 192.168.9.198 -j DROP
+
+iptables -A OUTPUT -p tcp --dport 80 -j DROP
+iptables -A INPUT -ptcp --dport  80 -j ACCEPT
+
+
+#安装nginx 
+#解压
+tar -zxvf gcc-8.2.0.tar.gz
+
+#参数及安装路径配置
+./configure --without-http_rewrite_module --without-http_gzip_module --prefix=/home/tpbbops/nginx
+
+#安装
+make install
+
+#配置反向服务代理器
+vi nginx.conf
+
+#nginx.conf 部分
+upstream tomcat_server{
+	server 172.30.100.6:80;   #转换到此服务器80端口
+}
+
+server{
+  listen 80;
+  server_name localhost;
+  #转发规则
+  location /{
+	proxy_pass http://tomcat_server;
+	root html;
+	index index.html index.htm;
+  }
+}
+
+#nginx.conf 结束
+
+#验证配置文件
+nginx -t -c nginx.conf
+
+#启动
+安装目录/sbin/   ./nginx
+
+
+
+#关闭
+安装目录/sbin/   ./nginx -s stop
+
+#重新加载
+安装目录/sbin/   ./nginx -s reload
+
+
+
+
+#文件筛选、排序
+#截取每行的 以":"分隔的第三个数据，唯一排序并统计出现的次数
+cat /etc/passwd|cut -d ':' -f 3 | uniq -c
+
+
+#分析java线程问题
+jstack -l pid
+
+
