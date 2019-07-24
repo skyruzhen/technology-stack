@@ -1,0 +1,28 @@
+servlet规范
+tomcat架构
+springboot 嵌入式容器  实现原理(自动装配，条件选择)
+restcontroller 自描述消息 media type; httpMessageConvert
+
+消息中间件
+active mq 和kafka区别
+activeMq相对来比较是比较完善的消息中间件，Kafka在能力上比较灵活，放弃了不少约束，性能相对较好。
+
+spring cloud 配置服务器
+事件/监听器
+读取配置文件
+
+服务治理
+通讯协议
+XML-RPC->webservices->SOAP(HTTP/SMTP)->
+REST->Json/XML->文本协议（Http Header、Body）
+Java Pojo
+Response Header-> Content-Type:application/json;charset=utf-8
+Dubbo:Hessian, Java Serialization
+
+eureka 
+服务注册，检索服务
+ribbon 客户端负载均衡
+
+turbine 集群
+
+
